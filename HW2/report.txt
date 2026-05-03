@@ -1,0 +1,50 @@
+Я использовал Redis.
+
+Запустить sync агента:
+uvicorn sync:app --reload
+Запустить async агента:
+uvicorn async:app --reload
+python async.py
+Протестировать агента (в отдельном терминале):
+python test.py
+
+Результаты:
+
+SYNC:
+===== SEQUENTIAL =====
+API Response Time (10): Time=8.37s, Avg=0.8365s
+Processing Time (10): Time=8.37s, Avg=0.8365s
+API Response Time (50): Time=50.88s, Avg=1.0176s
+Processing Time (50): Time=50.88s, Avg=1.0176s
+API Response Time (100): Time=97.72s, Avg=0.9772s
+Processing Time (100): Time=97.72s, Avg=0.9772s
+
+===== PARALLEL =====
+API Response Time (20): Time=1.11s, Avg=0.0553s
+Processing Time (20): Time=1.11s, Avg=0.0553s
+
+ASYNC:
+===== SEQUENTIAL =====
+API Response Time (10): Time=0.80s, Avg=0.0802s
+Processing Time (10): Time=10.99s, Avg=1.0993s
+API Response Time (50): Time=2.35s, Avg=0.0470s
+Processing Time (50): Time=48.12s, Avg=0.9625s
+API Response Time (100): Time=4.62s, Avg=0.0462s
+Processing Time (100): Time=98.56s, Avg=0.9856s
+
+===== PARALLEL =====
+API Response Time (20): Time=0.10s, Avg=0.0050s
+Processing Time (20): Time=18.69s, Avg=0.9346s
+
+
+В синхронной версии время выполнения растет окололинейно.
+В асинхронной версии время ответа API остается стабильно низким (миллисекунды), так как нагрузка перекладывается на воркеров.
+Разница стала очевидной уже на 10 запросах.
+
+API с брокером отвечает быстрее потому что теперь он сам не выполняет задачу. Его единственная обязанность — зафиксировать факт поступления запроса, пингануть Redis и вернуть статус. Вся работа теперь на вокере, который отделен от веб-сервиса.
+
+Минусы async:
+- Теперь API и задача разделены и приходят в разное время, соответственно нужна дополнительная логика для получения результата
+- Дополнительно нужно мониторить воркер процессы
+- Если воркер упадет, API продолжит принимать задачи в очередь, и пользователь не сразу узнает о проблеме без дополнительной логики проверки статуса самой задачи
+
