@@ -1,6 +1,6 @@
 # Grimoire
 
-Grimoire is a book recommendation engine built with Python, FastAPI, Polars, and SQLite. It interacts with the Hardcover GraphQL API to build a localized database of readers and their book ratings, using mean-centered collaborative filtering to generate highly personalized recommendations.
+Grimoire is a book recommendation engine built with Python, FastAPI, Polars, and SQLite. It interacts with the Hardcover GraphQL API to build a localized database of readers and their book ratings, using mean-centered collaborative filtering to generate highly personalized recommendations. Frontend is written by AI.
 
 ## Features
 
