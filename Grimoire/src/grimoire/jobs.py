@@ -50,6 +50,8 @@ def continuous_sync():
         user_books = books_api.fetch_books_by_username(username)
         if user_books and len([user_book for user_book in user_books if user_book.get("rating") is not None]) >= 5:
             db.merge(User(username=username))
+            db.query(UserRating).filter(UserRating.username == username).delete()
+            
             for user_book in user_books:
                 rating_val = user_book.get("rating")
                 book_data = user_book.get("book")
@@ -62,7 +64,7 @@ def continuous_sync():
                             average_rating=parsed_book["average_rating"], page_count=parsed_book["page_count"],
                             num_votes=parsed_book.get("num_votes", 0), cover_url=parsed_book.get("cover_url", "")
                         ))
-                        db.merge(UserRating(username=username, book_id=parsed_book["id"], rating=float(rating_val)))
+                        db.add(UserRating(username=username, book_id=parsed_book["id"], rating=float(rating_val)))
         db.commit()
     finally:
         db.close()

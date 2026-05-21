@@ -56,6 +56,8 @@ def get_recommendations(username: str, background_tasks: BackgroundTasks, db: Se
     user_books = books_api.fetch_books_by_username(username)
     if user_books and len([user_book for user_book in user_books if user_book.get("rating") is not None]) >= 5:
         db.merge(User(username=username))
+        db.query(UserRating).filter(UserRating.username == username).delete()
+        
         for rec in user_books:
             rating_val = rec.get("rating")
             book_data = rec.get("book")
@@ -69,7 +71,7 @@ def get_recommendations(username: str, background_tasks: BackgroundTasks, db: Se
                             average_rating=parsed_book["average_rating"], page_count=parsed_book["page_count"],
                             num_votes=parsed_book.get("num_votes", 0), cover_url=parsed_book.get("cover_url", "")
                         ))
-                        db.merge(UserRating(username=username, book_id=parsed_book["id"], rating=float(rating_val)))
+                        db.add(UserRating(username=username, book_id=parsed_book["id"], rating=float(rating_val)))
         db.commit()
         
         top_books, top_users = jobs.calculate_recommendations(db, username)
