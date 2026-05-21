@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grimoire</title>
+    <link rel="stylesheet" href="index.css">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header>
+        <div class="logo">Grimoire</div>
+        <div class="search-container">
+            <input type="text" id="username-input" placeholder="Enter Hardcover username (e.g. Jeeyo)">
+            <button id="search-btn">Discover</button>
+        </div>
+    </header>
+    
+    <main>
+        <section id="loading" class="hidden">
+            <div class="spinner"></div>
+            <p>Consulting the archives...</p>
+        </section>
+
+        <section id="results" class="hidden">
+            <aside class="sidebar">
+                <h3>Readers like you</h3>
+                <ul id="similar-users-list"></ul>
+            </aside>
+            <div class="content">
+                <h2>Recommended books for <span id="display-name">You</span></h2>
+                <div class="grid" id="books-grid"></div>
+            </div>
+        </section>
+        
+        <section id="error" class="hidden">
+            <p id="error-msg"></p>
+        </section>
+    </main>
+
+    <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,24 @@
+# Virtual environments
+venv/
+env/
+.env
+
+# Database
+grimoire.db
+*.sqlite3
+*.db
+*.db-wal
+*.db-shm
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+*.egg-info/
+
+# Hardcover
+.env
+
+# OS Files
+.DS_Store

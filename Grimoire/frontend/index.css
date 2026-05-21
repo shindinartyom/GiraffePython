@@ -1,0 +1,257 @@
+:root {
+    --bg-color: #f9f8f6;
+    --text-color: #1a1a1a;
+    --border-color: #d8d4cf;
+    --accent-color: #c94a3a;
+    --font-heading: 'Playfair Display', serif;
+    --font-body: 'Inter', sans-serif;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    background: linear-gradient(135deg, #fdfbf7 0%, #f4f1ea 100%);
+    background-attachment: fixed;
+    color: var(--text-color);
+    font-family: var(--font-body);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+}
+
+header {
+    width: 100%;
+    max-width: 1200px;
+    padding: 3rem 2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    border-bottom: 1px solid var(--border-color);
+    margin-bottom: 3rem;
+}
+
+.logo {
+    font-family: var(--font-heading);
+    font-size: 3.5rem;
+    font-weight: 700;
+    letter-spacing: -1px;
+    margin-bottom: 2rem;
+}
+
+.search-container {
+    display: flex;
+    gap: 1rem;
+    width: 100%;
+    max-width: 500px;
+}
+
+input {
+    flex: 1;
+    padding: 1rem 1.5rem;
+    border: 1px solid var(--border-color);
+    background: transparent;
+    font-family: var(--font-body);
+    font-size: 1rem;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+input:focus {
+    border-color: var(--text-color);
+}
+
+button {
+    background: var(--text-color);
+    color: var(--bg-color);
+    border: none;
+    padding: 0 2rem;
+    font-family: var(--font-body);
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+button:hover {
+    background: var(--accent-color);
+}
+
+main {
+    width: 100%;
+    max-width: 1200px;
+    padding: 0 2rem 4rem;
+}
+
+.hidden {
+    display: none !important;
+}
+
+#loading {
+    text-align: center;
+    padding: 5rem 0;
+    font-family: var(--font-heading);
+    font-size: 1.5rem;
+    color: #666;
+}
+
+#error {
+    text-align: center;
+    padding: 2rem;
+    background: #fdf5f5;
+    border: 1px solid #f1caca;
+    color: #c94a3a;
+    font-family: var(--font-body);
+}
+
+/* Layout */
+#results {
+    display: flex;
+    gap: 4rem;
+    align-items: flex-start;
+}
+
+.sidebar {
+    width: 250px;
+    flex-shrink: 0;
+    border-right: 1px solid var(--border-color);
+    padding-right: 2rem;
+}
+
+.sidebar h3 {
+    font-family: var(--font-heading);
+    font-size: 1.25rem;
+    margin-top: 0;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 0.5rem;
+}
+
+.sidebar ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.sidebar li {
+    padding: 0.75rem 0;
+    border-bottom: 1px solid #eae7e3;
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.9rem;
+}
+
+.sidebar li span.sim {
+    color: #888;
+    font-family: monospace;
+}
+
+.user-link {
+    color: var(--text-color);
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.user-link:hover {
+    text-decoration: underline;
+}
+
+.content {
+    flex: 1;
+}
+
+.content h2 {
+    font-family: var(--font-heading);
+    font-size: 2.5rem;
+    margin-top: 0;
+    margin-bottom: 2rem;
+    font-weight: 400;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 3rem 2rem;
+}
+
+.book-card {
+    display: flex;
+    flex-direction: column;
+}
+
+.cover {
+    width: 100%;
+    aspect-ratio: 2 / 3;
+    background-color: #eae7e3;
+    background-size: cover;
+    background-position: center;
+    margin-bottom: 1rem;
+    border: 1px solid var(--border-color);
+    box-shadow: 4px 4px 0px rgba(0,0,0,0.05);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.book-card:hover .cover {
+    transform: translate(-2px, -2px);
+    box-shadow: 6px 6px 0px rgba(0,0,0,0.1);
+}
+
+.title-container {
+    position: relative;
+    cursor: help;
+}
+
+.title-container:hover .tooltip {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(-50%) translateY(0);
+}
+
+.tooltip {
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    width: 400px;
+    background-color: var(--text-color);
+    color: var(--bg-color);
+    padding: 1rem;
+    font-size: 0.85rem;
+    font-family: var(--font-body);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    border-radius: 4px;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateX(-50%) translateY(10px);
+    transition: opacity 0.2s, transform 0.2s, visibility 0.2s;
+    z-index: 10;
+    pointer-events: none;
+    line-height: 1.4;
+    margin-bottom: 0.5rem;
+}
+
+.book-title {
+    font-family: var(--font-heading);
+    font-weight: 700;
+    font-size: 1.1rem;
+    line-height: 1.3;
+    margin-bottom: 0.25rem;
+    color: var(--text-color);
+    text-decoration: none;
+    display: block;
+}
+
+.book-title:hover {
+    text-decoration: underline;
+}
+
+.book-author {
+    font-size: 0.85rem;
+    color: #666;
+    margin-bottom: 0.5rem;
+}
+
+.book-meta {
+    font-size: 0.75rem;
+    color: #888;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
