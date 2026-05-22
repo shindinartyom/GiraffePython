@@ -21,7 +21,7 @@ def make_headers():
     return {"Authorization": f"Bearer {token}", "Content-Type": "application/json"}
 
 def parse_book(item):
-    """Parses a dictionary from the Hardcover GraphQL API into a dictionary that matches theBook database model.
+    """Parses a dictionary from the Hardcover GraphQL API into a dictionary that matches the Book database model.
 
     Args:
         item (dict): The raw book object from the GraphQL API response.

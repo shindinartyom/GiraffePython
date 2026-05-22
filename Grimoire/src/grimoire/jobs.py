@@ -106,10 +106,6 @@ def get_normalized_matrix(db):
         
     mapped_ratings = []
     for rating_record in ratings:
-        # avg = avg_ratings.get(rating_record.book_id, 2.5)
-        # centered = rating_record.rating - avg
-        # if centered == 0: centered = 1e-9
-        # mapped_ratings.append({"username": rating_record.username, "book_id": rating_record.book_id, "rating": centered})
         normalized = (rating_record.rating / 2.5) - 1.0
         if normalized == 0: normalized = 1e-9
         mapped_ratings.append({"username": rating_record.username, "book_id": rating_record.book_id, "rating": normalized})
