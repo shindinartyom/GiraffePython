@@ -8,6 +8,10 @@ user_fetch_offset = 0
 MAX_USERS = 25000
 
 def get_known_users():
+    """Initializes the global cache of known usernames from the local database.
+    
+    Populates the `known_users` set to prevent redundant fetching.
+    """
     global known_users
     db = SessionLocal()
     try:
@@ -17,6 +21,11 @@ def get_known_users():
         db.close()
 
 def fetch_new_users():
+    """Fetches new users from the Hardcover API and adds them to the processing queue.
+    
+    Paginates through the Hardcover API, adding at least 100 new users
+    per execution to the `users_to_process` queue until MAX_USERS is reached.
+    """
     global users_to_process, user_fetch_offset, known_users
     if user_fetch_offset > MAX_USERS:
         return
@@ -36,6 +45,12 @@ def fetch_new_users():
     print(f"Added {added_count} users to the queue")
 
 def continuous_sync():
+    """Processes a single user from the queue, syncing their profile and ratings into the local database.
+    
+    Pops the next user from the queue, fetches their latest books from the Hardcover API,
+    and updates their `User`, `Book`, and `UserRating` records in the local SQLite database.
+    If the queue is empty, it reloads all known users to continually refresh profiles.
+    """
     global users_to_process, user_fetch_offset, known_users
     if not users_to_process:
         if user_fetch_offset > MAX_USERS:
@@ -70,6 +85,18 @@ def continuous_sync():
         db.close()
 
 def get_normalized_matrix(db):
+    """Generates a dense, normalized rating matrix of all users and books.
+
+    Converts the user ratings into a dense matrix using Polars. Ratings are normalized
+    to a scale of -1 to 1 based on the `(rating / 2.5) - 1.0` formula. Missing ratings
+    are filled with 0.0.
+
+    Args:
+        db (sqlalchemy.orm.Session): The database session.
+
+    Returns:
+        polars.DataFrame: A DataFrame representing the dense rating matrix.
+    """
     ratings = db.query(UserRating).all()
     if not ratings:
         return pl.DataFrame({"username": []})
@@ -92,6 +119,21 @@ def get_normalized_matrix(db):
     return matrix
 
 def calculate_recommendations(db, username, matrix_df=None):
+    """Calculates recommendations and similar users for a target username.
+
+    Uses cosine similarity weighted by intersection count to find the 25 most
+    similar users. Then it computes a weighted average of their ratings to score unread books
+    for the target user. Saves the top recommendations and similar users back to the database.
+
+    Args:
+        db (sqlalchemy.orm.Session): The database session.
+        username (str): The username of the target user.
+        matrix_df (polars.DataFrame, optional): A pre-calculated rating matrix. 
+            If None, the matrix will be dynamically calculated. Defaults to None.
+
+    Returns:
+        tuple: A tuple containing a list of top books (id, score) and a list of top similar users.
+    """
     ratings = db.query(UserRating).filter(UserRating.username == username).all()
     if not ratings: return [], []
     if matrix_df is None:
@@ -145,6 +187,12 @@ def calculate_recommendations(db, username, matrix_df=None):
     return top_books, top_sim_users
 
 def recalculate_all_recommendations():
+    """Batch recalculates recommendations for every user in the local database.
+
+    Calculates the global normalized matrix once, then applies
+    the recommendation model to update all cached recommendations and
+    user similarities efficiently.
+    """
     print("Started recalculating recommendations")
     db = SessionLocal()
     try:

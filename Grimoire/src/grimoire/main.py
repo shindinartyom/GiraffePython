@@ -30,6 +30,11 @@ scheduler.add_job(jobs.recalculate_all_recommendations, 'interval', minutes=60, 
 scheduler.start()
 
 def get_db():
+    """Yields a database session.
+
+    Yields:
+        sqlalchemy.orm.Session: A database session to be used in endpoints.
+    """
     db = SessionLocal()
     try:
         yield db
@@ -38,6 +43,21 @@ def get_db():
 
 @app.get("/recommend/{username}")
 def get_recommendations(username: str, background_tasks: BackgroundTasks, db: Session = Depends(get_db)):
+    """Retrieves book recommendations and similar users for a given Hardcover username.
+
+    If the user exists in the local database, it instantly serves cached recommendations.
+    If the user does not exist, it fetches their profile from the Hardcover API, ingests
+    their ratings, and generates fresh recommendations dynamically.
+
+    Args:
+        username (str): The Hardcover username to fetch recommendations for.
+        background_tasks (fastapi.BackgroundTasks): FastAPI background task manager.
+        db (sqlalchemy.orm.Session): The database session.
+
+    Returns:
+        dict: A JSON response containing personalized recommendations and similar users, 
+              or a 404 response if the user has insufficient ratings or does not exist.
+    """
     recs = db.query(Recommendation).filter(Recommendation.username == username).order_by(Recommendation.score.desc()).all()
     if recs:
         sim_users = db.query(UserSimilarity).filter(UserSimilarity.target_username == username).order_by(UserSimilarity.similarity_score.desc()).all()

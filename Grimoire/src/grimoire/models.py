@@ -7,6 +7,15 @@ engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False, "
 
 @event.listens_for(engine, "connect")
 def set_sqlite_pragma(dbapi_connection, connection_record):
+    """Configures SQLite connection pragmas for concurrent access.
+
+    Enables Write-Ahead Logging (WAL) and sets synchronous mode to NORMAL
+    to allow concurrent reads and writes without locking errors.
+
+    Args:
+        dbapi_connection: The raw SQLite database API connection object.
+        connection_record: The connection record object from SQLAlchemy.
+    """
     cursor = dbapi_connection.cursor()
     cursor.execute("PRAGMA journal_mode=WAL")
     cursor.execute("PRAGMA synchronous=NORMAL")
@@ -54,8 +63,10 @@ class UserSimilarity(Base):
     similarity_score = Column(Float)
 
 def init_db():
+    """Creates all tables in the database."""
     Base.metadata.create_all(bind=engine)
 
 def reset_db():
+    """Deletes and recreates all tables in the database."""
     Base.metadata.drop_all(bind=engine)
     Base.metadata.create_all(bind=engine)
