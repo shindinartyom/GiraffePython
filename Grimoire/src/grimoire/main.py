@@ -6,11 +6,26 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from grimoire.models import SessionLocal, init_db, Book, Recommendation, UserRating, User, UserSimilarity
 from grimoire import jobs
 from grimoire import books_api
-from pydantic import BaseModel
-from typing import List, Optional
 from datetime import datetime, timedelta
+from contextlib import asynccontextmanager
 
-app = FastAPI(title="Grimoire")
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Manages the startup and shutdown lifecycle of the application.
+
+    Args:
+        app (fastapi.FastAPI): The FastAPI application instance.
+    """
+    scheduler = BackgroundScheduler()
+    jobs.get_known_users()
+    scheduler.add_job(jobs.fetch_new_users, 'interval', minutes=5, next_run_time=datetime.now() + timedelta(seconds=5))
+    scheduler.add_job(jobs.continuous_sync, 'interval', seconds=2)
+    scheduler.add_job(jobs.recalculate_all_recommendations, 'interval', minutes=60, next_run_time=datetime.now() + timedelta(seconds=10))
+    scheduler.start()
+    yield
+    scheduler.shutdown()
+
+app = FastAPI(title="Grimoire", lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
@@ -21,13 +36,6 @@ app.add_middleware(
 )
 
 init_db()
-
-scheduler = BackgroundScheduler()
-jobs.get_known_users()
-scheduler.add_job(jobs.fetch_new_users, 'interval', minutes=5, next_run_time=datetime.now() + timedelta(seconds=5))
-scheduler.add_job(jobs.continuous_sync, 'interval', seconds=2)
-scheduler.add_job(jobs.recalculate_all_recommendations, 'interval', minutes=60, next_run_time=datetime.now() + timedelta(seconds=10))
-scheduler.start()
 
 def get_db():
     """Yields a database session.
